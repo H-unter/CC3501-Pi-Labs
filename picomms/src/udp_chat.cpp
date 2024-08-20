@@ -13,9 +13,6 @@
 #include <poll.h>
 #include <iostream>
 
-
-//call it like ./client host port msg
-
 int main(int argc, char *argv[])
 {
     char *input_function_name = argv[0];  // Points to the program name
