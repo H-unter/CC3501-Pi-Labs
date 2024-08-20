@@ -48,4 +48,4 @@ _deps
 CMakeUserPresets.json
 
 */build
-*/vscode
+*.vscode
