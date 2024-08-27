@@ -1,8 +1,7 @@
 #include <curl/curl.h>
 #include <stdio.h>
 #include <fcntl.h>
-
-// To call we use ./http_client google.com
+#include <string>
 
 size_t http_callback(void *buffer, size_t sz, size_t nmemb, void *userp)
 {
@@ -29,8 +28,8 @@ size_t http_callback(void *buffer, size_t sz, size_t nmemb, void *userp)
     /* Calculate the amount of data that was passed in */
     size_t size = sz * nmemb;
 
-    // Was data received?
-    if (size > 0) {
+    bool is_data_received = size > 0;
+    if (is_data_received) {
         // Print the message that was received.
         // It will not be null terminated, so use fwrite instead of printf.
         fwrite(buffer, sz, nmemb, stdout);
@@ -44,13 +43,33 @@ size_t http_callback(void *buffer, size_t sz, size_t nmemb, void *userp)
 
 int main(int argc, char *argv[])
 {
+    
+    
+    // Final message format:
+    // http://api.thingspeak.com/update?api_key=ZKE95ZURWV7DW8B0
+	// &field1=username
+	// &field2=Official%20app%20says%20hello
+
     // argc is the number of command-line arguments provided to the program.
     // The first argument (argv[0]) is always the name of the program.
-    if (argc < 2) {
-        printf("Usage:\n");
-        printf("%s URL    Fetch the specified HTTP URL\n", argv[0]);
-        return 1;
+
+    char *input_function_name = argv[0];  // Points to the program name
+    
+
+    if (argc != 3) { // Ensure exactly 2 arguments are provided
+    printf("Usage:\n");
+    printf("%s <username> <message>\n", input_function_name);
+    return 1;
     }
+
+    char *input_username = argv[1];      // Points to the username provided by the user
+    char *input_message = argv[2];    // Points to the message provided by the user
+
+    std::string THINGSPEAK_URL = "http://api.thingspeak.com/update?api_key=ZKE95ZURWV7DW8B0";
+    std::string username = input_username;
+    std::string message = input_message;
+    std::string final_url = THINGSPEAK_URL + "&field1=" + username + "&field2=" + message;
+
 
     // Initialise the HTTP library
     CURL *curl = curl_easy_init();
@@ -63,7 +82,7 @@ int main(int argc, char *argv[])
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, http_callback);
 
     // Configure the URL to load
-    curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
+    curl_easy_setopt(curl, CURLOPT_URL, final_url.c_str());
 
     // Send the HTTP request
     CURLcode res = curl_easy_perform(curl);
